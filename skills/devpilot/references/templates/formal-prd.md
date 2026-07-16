@@ -35,14 +35,28 @@
 ### Should have
 - {…}
 
-## 6. Timeline summary
+## 6. Design direction
+
+<!-- From design.md; omit this section entirely if the project has no UI. -->
+
+{One short narrative: visual style, color mode, layout density, target
+devices — and why it fits the target users. Full detail in docs/core/design.md.}
+
+| Aspect | Choice |
+|---|---|
+| Visual style | {…} |
+| Primary palette | {primary/secondary/accent hex} |
+| Color mode | {light / dark / both} |
+| Target devices | {…} |
+
+## 7. Timeline summary
 
 {High-level phase timeline — details in timeline-gantt.md. Estimates, not commitments.}
 
-## 7. Risks & assumptions
+## 8. Risks & assumptions
 
 - {…}
 
-## 8. Out of scope
+## 9. Out of scope
 
 {From requirements.md Out of scope.}

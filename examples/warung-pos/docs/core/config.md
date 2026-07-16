@@ -29,6 +29,7 @@ Laravel 11 + Vue 3 + PostgreSQL 16, deployed with Docker
 | features.md | yes | |
 | tech-stack.md | yes | |
 | architecture.md | yes | |
+| design.md | yes | |
 | database.md | yes | |
 | api-contract.md | yes | |
 | phases.md | yes | |

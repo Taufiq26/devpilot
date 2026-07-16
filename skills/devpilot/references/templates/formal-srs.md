@@ -50,6 +50,13 @@
 
 ## 5. External interfaces
 
+### 5.1 User interface
+
+{Design direction summary — visual style, palette, target devices,
+accessibility baseline — from design.md; omit if project has no UI.}
+
+### 5.2 APIs
+
 {API summary — from api-contract.md; omit if project has no API.}
 
 ## 6. Data requirements
