@@ -65,8 +65,9 @@ and which core docs are active.
 - **Docs are navigation, not substitutes:** before editing any source file
   during execution, Read the actual current file first.
 - **Only generate applicable core docs.** No API → skip `api-contract.md`; no
-  database → skip `database.md`. Record the active-docs list (and why any were
-  skipped) in `config.md`. Never emit empty shell documents.
+  database → skip `database.md`; no user interface → skip `design.md`. Record
+  the active-docs list (and why any were skipped) in `config.md`. Never emit
+  empty shell documents.
 - **Estimates are estimates.** Mandays and timeline figures are planning
   figures ("as if executed by a team per division"), not commitments. Templates
   label them as such — keep that labeling in generated output.
@@ -89,19 +90,53 @@ and which core docs are active.
    6. Project type and team divisions — auto-propose divisions from project
       type (web app → Frontend, Backend, UI/UX, QA, DevOps; mobile app → those
       + Mobile; API/CLI-only → drop UI/UX), then let the user confirm or edit.
+   7. UI/UX design direction — **only if the project has a user interface**.
+      Run the design interview (below).
 
    Stop interviewing as soon as every applicable core doc can be written
    concretely — don't pad.
 3. **Generate `docs/core/`** from `<templates>` (core-*.md): `config`,
    `requirements`, `features` (per-division mandays for every feature),
-   `tech-stack`, `architecture`, `database` (if applicable), `api-contract`
-   (if applicable), `phases` (ordered, dependency-aware plan; phases and tasks
-   numbered `N` / `N.M`), and `backlog` (empty scaffold).
+   `tech-stack`, `architecture`, `design` (if applicable), `database` (if
+   applicable), `api-contract` (if applicable), `phases` (ordered,
+   dependency-aware plan; phases and tasks numbered `N` / `N.M`), and
+   `backlog` (empty scaffold).
 4. **Production hygiene** (section below).
 5. **Git:** if the folder is not a git repository, offer `git init`.
 6. Report the generated files, then ask whether to start executing Phase 1 now.
 
-## /devpilot onboard — existing project
+### Design interview (init step 2.7)
+
+Runs only when the project has a user interface. Many users are not designers,
+so **every question here is asked via AskUserQuestion with concrete options**,
+each option described in plain language (what it looks/feels like, and what
+kind of product it suits) — never assume design vocabulary, and never ask
+open-ended "describe your design" questions. Still one question at a time.
+
+1. **Visual style** — options tailored to the project type, e.g.:
+   *Minimalist & clean* (lots of whitespace, few colors — content-focused
+   apps); *Playful & colorful* (rounded shapes, bright accents — consumer or
+   kids products); *Professional & corporate* (formal, trust-building —
+   business/finance); *Bold & modern* (strong contrast, dark-friendly —
+   tech/startup).
+2. **Color direction** — first option "I have brand colors" (then collect
+   them); otherwise propose 2–3 concrete palettes (named, with hex values)
+   that match the chosen style, as options to pick from.
+3. **Light/dark mode** — light only, dark only, or both (note that "both"
+   costs extra effort; reflect it in mandays).
+4. **Layout density** — *Spacious* (large elements, easy scanning — marketing
+   pages, simple apps) vs *Compact* (information-dense — dashboards, admin
+   tools).
+5. **Target devices** — mobile-first, desktop-first, or fully responsive;
+   propose a default based on the project type and target users.
+6. **Reference apps/sites** — optional free text: products the user likes the
+   look of and what they like about them. "None / just decide for me" is a
+   valid answer.
+
+Typography, component conventions (corner radius, shadows, icon set), and the
+accessibility baseline are **not** interviewed one by one: propose a coherent
+set of defaults derived from the answers above and ask for a single
+confirmation. Record everything in `design.md`.
 
 1. **Preflight:** same docs-folder conflict handling as init step 1.
 2. **Analyze the codebase:** structure, stack (read manifests — `package.json`,
@@ -119,9 +154,12 @@ and which core docs are active.
    stack/architecture; divisions (auto-propose + confirm); and anything the
    code cannot reveal (goals, target users).
 4. **Generate `docs/core/`** describing **what already exists**, so future
-   feature work does not conflict with current behavior. `phases.md` contains a
-   single completed marker — `Phase 0 — Existing system (baseline)` — and no
-   pending phases.
+   feature work does not conflict with current behavior. If the project has a
+   UI, derive `design.md` from the existing frontend (UI framework/library,
+   theme/palette from CSS or design tokens, layout patterns) instead of
+   interviewing — only ask about design gaps the code cannot reveal.
+   `phases.md` contains a single completed marker — `Phase 0 — Existing system
+   (baseline)` — and no pending phases.
 5. **Production hygiene** (section below).
 6. Report the generated files and suggest next actions (`feature`, `docs`).
 
@@ -133,8 +171,8 @@ and which core docs are active.
 3. **Impact analysis:** read the core docs and produce a table — affected doc →
    section → change summary. Examples: new table → `database.md` (+ migration
    note); new endpoints → `api-contract.md`; mandays delta → `features.md`;
-   requirement changes → `requirements.md`; and the new phases that
-   implementation would need.
+   requirement changes → `requirements.md`; new screens or a changed visual
+   direction → `design.md`; and the new phases that implementation would need.
 4. Ask exactly **one** decision question: implement **now** or **later**?
 5. - **Now** → apply the updates to every affected core doc → append the new
      phase(s) with tasks to `phases.md` → begin Phase execution.
@@ -230,8 +268,9 @@ committed on all branches, including main):
 `<templates>` contains one template per document:
 
 - Core: `core-config.md`, `core-requirements.md`, `core-features.md`,
-  `core-tech-stack.md`, `core-architecture.md`, `core-database.md`,
-  `core-api-contract.md`, `core-phases.md`, `core-backlog.md`
+  `core-tech-stack.md`, `core-architecture.md`, `core-design.md`,
+  `core-database.md`, `core-api-contract.md`, `core-phases.md`,
+  `core-backlog.md`
 - Formal: `formal-prd.md`, `formal-srs.md`, `formal-timeline-gantt.md`
 
 Read the template before generating each document. Follow its structure, fill

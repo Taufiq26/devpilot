@@ -33,6 +33,7 @@
 | features.md | yes | |
 | tech-stack.md | yes | |
 | architecture.md | yes | |
+| design.md | {yes/no} | {skipped: project has no user interface} |
 | database.md | {yes/no} | {skipped: project has no database} |
 | api-contract.md | {yes/no} | {skipped: project has no API} |
 | phases.md | yes | |
