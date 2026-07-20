@@ -73,6 +73,15 @@ and which core docs are active.
   label them as such — keep that labeling in generated output.
 - User edits to core docs are authoritative. If a manual edit contradicts
   `phases.md` state, surface the conflict and ask before proceeding.
+- **`docs/README.md` is always generated, regardless of who executes next.**
+  Not everyone picking up the project will have the devpilot skill loaded —
+  the docs must stand on their own. `docs/README.md` (from `<templates>`
+  `readme.md`) is a skill-agnostic entry point stating the doc structure and
+  the operating discipline (work `phases.md` in order, check off tasks
+  immediately, one commit per phase, log new ambiguities to `backlog.md`
+  instead of assuming) in plain terms any AI agent or human can follow
+  without knowing devpilot exists. Keep its document list in sync with
+  `config.md`'s Active documents table whenever that list changes.
 
 ## /devpilot init — new project
 
@@ -100,7 +109,8 @@ and which core docs are active.
    `tech-stack`, `architecture`, `design` (if applicable), `database` (if
    applicable), `api-contract` (if applicable), `phases` (ordered,
    dependency-aware plan; phases and tasks numbered `N` / `N.M`), and
-   `backlog` (empty scaffold).
+   `backlog` (empty scaffold). Also generate `docs/README.md` from
+   `<templates>` `readme.md` (see Global rules).
 4. **Production hygiene** (section below).
 5. **Git:** if the folder is not a git repository, offer `git init`.
 6. Report the generated files, then ask whether to start executing Phase 1 now.
@@ -159,7 +169,8 @@ confirmation. Record everything in `design.md`.
    theme/palette from CSS or design tokens, layout patterns) instead of
    interviewing — only ask about design gaps the code cannot reveal.
    `phases.md` contains a single completed marker — `Phase 0 — Existing system
-   (baseline)` — and no pending phases.
+   (baseline)` — and no pending phases. Also generate `docs/README.md` from
+   `<templates>` `readme.md` (see Global rules).
 5. **Production hygiene** (section below).
 6. Report the generated files and suggest next actions (`feature`, `docs`).
 
@@ -272,6 +283,9 @@ committed on all branches, including main):
   `core-database.md`, `core-api-contract.md`, `core-phases.md`,
   `core-backlog.md`
 - Formal: `formal-prd.md`, `formal-srs.md`, `formal-timeline-gantt.md`
+- Meta: `readme.md` — generates `docs/README.md`, the skill-agnostic entry
+  point (Global rules). Unlike core docs, this one is **never** skipped —
+  it's not conditional on project type, it always applies.
 
 Read the template before generating each document. Follow its structure, fill
 every `{placeholder}`, translate headings into the configured document
