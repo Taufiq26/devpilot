@@ -9,7 +9,9 @@
 | Document language | {Indonesian / English / …} |
 | Docs folder | {docs} |
 | Created | {YYYY-MM-DD} |
-| devpilot version | 0.1.0 |
+| devpilot version | 0.2.0 |
+| Core doc filenames | numbered ({00-config.md} …) |
+| Phase file layout | {single / split — see SKILL.md Global rules} |
 
 ## Divisions
 
@@ -38,3 +40,13 @@
 | api-contract.md | {yes/no} | {skipped: project has no API} |
 | phases.md | yes | |
 | backlog.md | yes | |
+| changelog.md | yes | |
+
+## Source documents
+
+<!-- Only include this section if the user supplied external requirement
+     documents (ERD/SRS/FRS/tech spec/custom) during init/onboard/feature.
+     Omit the section entirely otherwise — don't leave it as "none". -->
+| Document | Type | Ingested | Used for |
+|---|---|---|---|
+| {client-srs.pdf} | {SRS} | {YYYY-MM-DD} | {requirements.md, features.md} |

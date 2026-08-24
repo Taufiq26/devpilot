@@ -23,9 +23,17 @@ menulis kode apa pun.
   - `{doc-name}.md` — {one-sentence purpose}.
   - `phases.md` — **execution plan**: fase & task bernomor, dependency-aware.
   - `backlog.md` — item yang ditunda beserta analisis dampaknya.
-- **`{docs}/formal/`** — dokumen presentasi (PRD/SRS/gantt) diturunkan dari
-  `core/` untuk stakeholder/manusia — bukan working source, jangan diedit
-  langsung (edit `core/` lalu regenerate lewat `/devpilot docs`).
+  - `changelog.md` — **wajib**: log setiap fitur baru, revisi, dan bugfix,
+    dengan tipe & ukuran perubahan, ditandai selesai begitu benar-benar selesai.
+  <!-- Nama file di atas mungkin punya prefix angka (mis. `00-config.md`)
+       tergantung kapan proyek ini dibuat — cukup cari berdasarkan nama
+       dasarnya, urutan baca tetap seperti daftar di atas. -->
+- **`{docs}/formal/`** — dokumen presentasi (PRD/SRS/gantt/dashboard) diturunkan
+  dari `core/` untuk stakeholder/manusia — bukan working source, jangan
+  diedit langsung (edit `core/` lalu regenerate lewat `/devpilot docs`).
+  `progress-dashboard.html` adalah laporan progress yang bisa dibuka langsung
+  di browser (tanpa server) untuk PM/client — dikelompokkan per fitur baru,
+  revisi, dan bugfix.
 
 ## Cara kerja yang diharapkan
 
@@ -47,6 +55,9 @@ menulis kode apa pun.
    ini: jangan berasumsi diam-diam. Catat ke `backlog.md` (jika ditunda) atau
    tanyakan ke pemilik proyek, lalu **update dokumen `core/` yang relevan** —
    dokumen ini harus tetap hidup & akurat, bukan snapshot yang boleh basi.
+7. **Setiap fitur baru, revisi, atau bugfix wajib dicatat di `changelog.md`**
+   dan ditandai `done` di commit yang sama dengan perubahan kodenya — tidak
+   boleh ditunda atau dilewati diam-diam, walau perubahannya kecil.
 
 ## Catatan penting
 

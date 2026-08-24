@@ -38,9 +38,13 @@ AI agent to build/extend projects without losing context between sessions.
      current code structure and behavior.
    - `/devpilot feature "<description>"` — feature-addition flow (impact analysis →
      now/later).
+   - `/devpilot revise "<description>"` — same flow as `feature`, for changing an
+     existing feature's behavior (v0.2, requirement 22).
+   - `/devpilot fix "<description>"` — bug-fix flow: root cause + impact analysis,
+     implemented immediately, no now/later choice (v0.2, requirement 22).
    - `/devpilot resume` — continue interrupted phase execution.
    - `/devpilot docs <type>` — generate a formal document (`prd`, `srs`, `gantt`,
-     or `all`) from core docs.
+     `dashboard`, or `all`) from core docs.
    - `/devpilot status` — show phase/task progress summary.
 
 ### Documentation structure (core + formal)
@@ -54,17 +58,26 @@ AI agent to build/extend projects without losing context between sessions.
      - `features.md` — feature/module list, each with per-division mandays estimates.
      - `tech-stack.md` — chosen stack with reasoning.
      - `architecture.md` — ideal server/deployment architecture.
+     - `design.md` — visual style, palette, layout direction (omit for
+       projects with no user interface).
      - `database.md` — ERD (mermaid) + schema; changes carry migration notes.
      - `api-contract.md` — endpoint contracts (omit for projects with no API).
      - `phases.md` — sequential execution phases with task-level checkboxes and
        per-phase status.
      - `backlog.md` — deferred features, each with its saved impact analysis.
+     - `changelog.md` — mandatory log of every feature/revision/bugfix, typed
+       and sized (requirement 22).
+     Filenames carry a numeric prefix reflecting this reading order for
+     projects created under v0.2+ (requirement 21).
    - `docs/formal/` — **generated on demand only**, never hand-maintained:
-     `PRD.md`, `SRS.md`, `timeline-gantt.md` (mermaid gantt per division). Each
-     regeneration derives fully from current `docs/core/`, so formal docs can
-     never drift from core.
+     `PRD.md`, `SRS.md`, `timeline-gantt.md` (mermaid gantt per division), and
+     `progress-dashboard.html` (requirement 23 — different regeneration model
+     from the other three). Each regeneration derives fully from current
+     `docs/core/`, so formal docs can never drift from core.
 6. Formal docs must carry a header noting they are generated from `docs/core/` with
-   a generation date.
+   a generation date. `progress-dashboard.html` is the one exception — its
+   "freshness" signal is the `generatedAt` timestamp inside its data block,
+   not a markdown header (requirement 23).
 
 ### Init flow (new project)
 
@@ -139,11 +152,96 @@ AI agent to build/extend projects without losing context between sessions.
     happens at build/deploy level only. No branch-conditional `.gitignore`
     mechanics.
 
+### External document ingestion (v0.2)
+
+20. During `init`/`onboard`/`feature`/`revise`, ask once whether the user has
+    existing documents describing the project or the change (ERD, SRS, FRS,
+    technical specification, or any custom document). If supplied, read them
+    fully and use their content to seed the matching core docs (ERD →
+    `database.md`; SRS/FRS → `requirements.md` + `features.md`; tech spec →
+    `tech-stack.md` + `architecture.md`); the interview that follows only
+    closes gaps those documents don't answer. Record each ingested document
+    (name, type, date, which core docs it fed) in `config.md`'s Source
+    documents section for provenance. Skipping this (no documents supplied)
+    must never lengthen or block the normal flow.
+
+### Numbered core doc filenames (v0.2)
+
+21. `init`/`onboard` generate `docs/core/` files with a fixed numeric prefix
+    per document type (`00-config.md` … `10-changelog.md`) so the reading
+    order is visible in a plain file listing without opening `docs/README.md`
+    first. This is a **new-projects-only** convention: devpilot must never
+    rename an already-generated project's existing (unprefixed) core doc
+    filenames, and all doc-location logic must work identically for both
+    naming styles (locate by content marker / base name, never a hardcoded
+    path).
+
+### Changelog and fix/revise commands (v0.2)
+
+22. `docs/core/changelog.md` logs every feature addition, revision, and bug
+    fix, each entry classified by **type** (`feature`/`revision`/`bugfix`)
+    and **size** (`small`/`medium`/`large`, judged case-by-case from scope of
+    files/docs touched and complexity — no fixed manday threshold) alongside
+    status (`open`/`in-progress`/`done`), dates, affected docs, and the
+    related phase/commit. Two new subcommands parallel `feature`:
+    - `/devpilot revise "<description>"` — same impact-analysis/now-or-later
+      flow as `feature`, for changes to a feature's existing behavior; logs a
+      `revision` entry.
+    - `/devpilot fix "<description>"` — root cause + impact analysis, no
+      now/later choice (bugs are fixed immediately, not deferred by default);
+      logs a `bugfix` entry with its root cause.
+    Logging is **mandatory**: an entry must be marked `done` (with closing
+    date and commit reference) in the same commit as the change it describes
+    — this is part of the task's definition of done, not a follow-up step.
+
+### Progress dashboard (v0.2)
+
+23. `docs/formal/progress-dashboard.html` is a self-contained static HTML
+    report (inline CSS/JS, no CDN, no build step, opens via `file://` with no
+    network calls) for PM/client stakeholders: overall phase/task progress,
+    a phase list, a backlog table, and a changelog table filterable by type,
+    size, and status. It follows a **shell-and-data** regeneration model,
+    unlike every other formal doc: the visual shell is written once from its
+    template and never rewritten on regeneration; only the embedded JSON data
+    block (marked by HTML comments) is replaced, computed fresh from
+    `phases.md` + `backlog.md` + `changelog.md`. It is generated at
+    `init`/`onboard` and refreshed automatically whenever a phase completes
+    or a changelog entry opens/closes, in addition to on-demand via
+    `/devpilot docs dashboard`.
+
+### Scaling to large/complex projects (v0.2)
+
+24. **Milestones and split phase layout.** `phases.md` may optionally group
+    phases under named milestones (`| Milestone | Phases | Status |`, above
+    the existing Overview table) when phases fall into clearly separable
+    modules/subsystems or the phase count stops being scannable as a flat
+    list. Independently, `config.md` records a **Phase file layout**:
+    `single` (default, everything in one `phases.md`) or `split`
+    (`docs/core/phases/00-overview.md` for the Milestones/Overview
+    tables + status; each phase's task detail in its own `phase-{N}.md`).
+    devpilot proposes switching to `split` (asked once, then performed by
+    devpilot itself — never left as a manual user task) when the phase count
+    heads past roughly 12 or `phases.md` approaches ~800 lines, whether at
+    `init` planning time or when `feature`/`revise` would push an existing
+    `single`-layout project over that line. Every instruction elsewhere that
+    reads or writes "`phases.md`" means whichever layout is active.
+25. **Interview depth scales with signaled complexity.** The `init` feature-
+    scope question (requirement 7) probes module-by-module, one question at a
+    time, when the project has several interacting modules, multiple user
+    roles with distinct permissions, multiple external integrations, or
+    explicit compliance/regulatory requirements; a single-purpose app still
+    gets one pass. This is a judgment call, not a fixed question script — the
+    existing "stop as soon as every applicable core doc can be written
+    concretely" rule (requirement 7) still bounds it on the other side.
+
 ## Constraints
 
 - **Markdown-only skill**: no runtime dependencies, no network calls, no installer.
   Everything the skill does is instruction-driven through Claude Code's normal
-  tools (Read/Write/Edit/Bash/git).
+  tools (Read/Write/Edit/Bash/git). `progress-dashboard.html` (requirement 23)
+  doesn't break this: it's one more generated static file, self-contained
+  with everything inlined, no CDN/network/build step — the skill still only
+  ever uses Read/Write/Edit to produce it.
 - Claude Code is the only target platform for v1. Multi-platform (Cursor, Codex,
   Gemini CLI) and marketplace-plugin packaging are explicit non-goals for v1.
 - Generated project docs follow the per-project language choice; the **repo's own
@@ -190,15 +288,30 @@ AI agent to build/extend projects without losing context between sessions.
     (prioritize entry points, schema, routes) and state explicitly in generated
     docs which areas were sampled vs. fully analyzed; recommend graphify when the
     codebase exceeds comfortable direct analysis.
+12. **Project created before v0.2** (unprefixed core doc filenames): devpilot
+    keeps using them as-is; never auto-renames to the numbered convention.
+13. **User hand-edits `progress-dashboard.html`** (e.g. tweaks the shell's
+    CSS): treat as authoritative like any other user edit (edge case 7) — the
+    next data-only regeneration must not clobber it, since regeneration only
+    ever touches the marked data block, never the surrounding shell.
+14. **Ambiguous bug report** (`/devpilot fix` with a vague description): mini-
+    interview for reproduction steps / observed-vs-expected before doing root
+    cause analysis, same narrow-question discipline as the `feature` flow.
+15. **`single` → `split` conversion mid-project** (requirement 24): devpilot
+    performs the file move itself (lift each `## Phase N` section into
+    `phases/phase-{N}.md`, leave tables in `phases/00-overview.md`, update
+    `config.md`'s Phase file layout row) in the same turn it's confirmed —
+    never a partially-done state left for the user to finish.
 
 ## Definition of Done
 
 - [ ] Repo contains `skills/devpilot/SKILL.md` + `references/` templates for every
       core doc (`config`, `requirements`, `features`, `tech-stack`, `architecture`,
-      `database`, `api-contract`, `phases`, `backlog`) and every formal doc
-      (`PRD`, `SRS`, `timeline-gantt`).
+      `design`, `database`, `api-contract`, `phases`, `backlog`, `changelog`) and
+      every formal doc (`PRD`, `SRS`, `timeline-gantt`, `progress-dashboard`).
 - [ ] Copying the skill folder into `~/.claude/skills/` makes `/devpilot` invocable
-      in Claude Code with all seven behaviors from requirement 4.
+      in Claude Code with all nine behaviors from requirement 4 (incl. `revise`
+      and `fix`).
 - [ ] **Init test**: running `/devpilot init` in an empty folder conducts a
       one-question-at-a-time interview (incl. language + division confirmation) and
       produces a complete `docs/core/` set with per-division mandays in
@@ -219,4 +332,23 @@ AI agent to build/extend projects without losing context between sessions.
       created/updated during init/onboard per requirement 19.
 - [ ] README (English) documents installation, all subcommands, the core/formal
       concept, and includes a worked example; LICENSE present.
+- [ ] **External doc test**: supplying an ERD/SRS during `init` seeds the
+      matching core docs and the remaining interview skips questions already
+      answered by it; `config.md` records the source document.
+- [ ] **Revise/fix test**: `/devpilot revise` on an existing feature updates
+      the relevant core doc's current-behavior section and logs a `revision`
+      changelog entry; `/devpilot fix` on a reproducible bug implements
+      immediately (no now/later prompt) and logs a `bugfix` entry with root
+      cause, both marked `done` in their completing commit.
+- [ ] **Dashboard test**: `/devpilot docs dashboard` on a project with phases,
+      backlog, and changelog entries produces a `progress-dashboard.html` that
+      opens via `file://` with no console errors, shows correct progress
+      fractions, and its type/size/status filters actually narrow the
+      changelog table; regenerating after a change replaces only the embedded
+      data block, verified by diffing the file (shell bytes unchanged).
+- [ ] **Scale test**: a project planned with 15+ phases gets a Milestones
+      table and, once `phases.md` nears the size threshold, devpilot proposes
+      and performs the `single` → `split` conversion itself (verified: no
+      task/status data lost, `config.md` updated, `resume`/`status` still work
+      unchanged against the split layout).
 - [ ] Edge cases 1–3, 5, 6, and 10 verified by manual test on a scratch project.
