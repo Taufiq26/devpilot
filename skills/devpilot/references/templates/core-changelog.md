@@ -22,6 +22,11 @@ _No entries yet._
 - **Affected docs:** {database.md, api-contract.md, …}
 - **Related:** {Phase N / commit sha}
 
+<!-- only if this entry touches auth/session/authorization/payment/PII/
+     crypto/secret handling — see SKILL.md Global rules on the mandatory
+     security review checkpoint. Omit this line entirely otherwise. -->
+- **Security review:** passed ({checklist} / {security-reviewer agent}) | flagged — {what, and whether resolved}
+
 <!-- bugfix entries only -->
 - **Root cause:** {…}
 -->

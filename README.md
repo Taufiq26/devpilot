@@ -28,6 +28,10 @@ is old-fashioned — write things down. devpilot enforces that discipline:
 - **Scales to large projects** — phases can group under milestones, and
   `phases.md` splits itself into one file per phase (devpilot does the move,
   not you) once a plan grows past ~12 phases or ~800 lines.
+- **Traceable and audited** — every feature row in `features.md` cites the
+  `FR-N` requirement it implements; consequential tradeoffs get a decision-log
+  entry (lite ADR) in `config.md`; and auth/payment/PII/crypto work runs
+  through a mandatory security-review checkpoint before it can be marked done.
 
 ## Install
 
@@ -125,7 +129,10 @@ including a mid-execution `phases.md` and a generated gantt.
   document doesn't answer.
 - **Production hygiene:** devpilot adds `docs/`, `CLAUDE.md`, `AGENTS.md` and
   similar AI files to your stack's build-exclusion files (`.dockerignore`,
-  `.vercelignore`, …) so they stay in git but out of production builds.
+  `.vercelignore`, …) so they stay in git but out of production builds. If
+  the project has a GitHub remote and no CI yet, it can also scaffold a
+  minimal `.github/workflows/ci.yml` that runs your project's own existing
+  lint/test commands — nothing invented, no coverage policy imposed.
 - **[graphify](https://github.com/Graphify-Labs/graphify) integration is
   optional:** if installed, `onboard` uses it to analyze large codebases
   faster; everything works without it.

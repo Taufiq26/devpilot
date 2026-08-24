@@ -7,9 +7,9 @@
 
 ## Module: {name}
 
-| Feature | Description | Priority | {FE} md | {BE} md | {UI/UX} md | {QA} md | {DevOps} md | Total |
-|---|---|---|---|---|---|---|---|---|
-| {feature} | {…} | {must/should/could} | {n} | {n} | {n} | {n} | {n} | {n} |
+| Feature | Description | Requirement(s) | Priority | {FE} md | {BE} md | {UI/UX} md | {QA} md | {DevOps} md | Total |
+|---|---|---|---|---|---|---|---|---|---|
+| {feature} | {…} | {FR-1, FR-3} | {must/should/could} | {n} | {n} | {n} | {n} | {n} | {n} |
 
 ## Totals
 

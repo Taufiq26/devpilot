@@ -128,6 +128,30 @@ may or may not carry one, and readers can pattern-match either way.
   that can be forgotten or deferred. If a change happens outside those three
   commands (an ad hoc edit during phase execution, say), still log it before
   considering the work finished.
+- **Decision log entries are appended for consequential choices, not every
+  choice.** Whenever `init`, `onboard`, `feature`, `revise`, or a phase
+  in-flight settles a tradeoff that would surprise someone reading the docs
+  cold — a tech/architecture choice made among real alternatives, a scope cut
+  the user requested, a divergence from what the user originally described,
+  or a structural call like switching phase file layout — append an entry to
+  `config.md`'s **Decision log** (decision, rationale, alternatives
+  considered). Routine implementation choices (variable names, which loop
+  construct) never go here; if in doubt, ask "would the next person reading
+  this be confused without it?" — only log if yes.
+- **Security-sensitive work requires a mandatory review checkpoint — same
+  severity as changelog logging, not optional diligence.** A task or phase
+  touches auth/session handling, authorization/permission checks, payment or
+  billing, personal/sensitive user data (PII), file upload, or
+  cryptography/secret handling → treat it as security-sensitive. Before
+  marking that task/phase done: run the security checklist explicitly as a
+  visible step (Code quality standards, below) — don't fold it silently into
+  "wrote the code." **If a dedicated security-review subagent/skill is
+  available in this environment, use it; otherwise perform the checklist
+  yourself** — either way this must actually happen, and say which one you
+  did in the phase report. Record the outcome in the changelog entry's
+  optional **Security review** field (`core-changelog.md`) when the work is
+  logged. This gate cannot be silently skipped for triggered work, the same
+  way a changelog entry cannot be silently skipped.
 - **External requirement documents are optional input, not a replacement for
   the interview.** During `init`/`onboard`/`feature`/`revise`, ask once
   whether the user has existing documents describing the project or the
@@ -176,7 +200,10 @@ may or may not carry one, and readers can pattern-match either way.
    concretely — don't pad.
 3. **Generate `docs/core/`** from `<templates>` (core-*.md) with numbered
    filenames (Templates section): `00-config`, `01-requirements`,
-   `02-features` (per-division mandays for every feature), `03-tech-stack`,
+   `02-features` (per-division mandays for every feature, each row's
+   Requirement(s) column citing the `FR-N` id(s) it implements — this is the
+   traceability link back to `01-requirements`, keep it accurate as either
+   doc changes), `03-tech-stack`,
    `04-architecture`, `05-design` (if applicable), `06-database` (if
    applicable), `07-api-contract` (if applicable), `08-phases` (ordered,
    dependency-aware plan; phases and tasks numbered `N` / `N.M`; propose
@@ -263,9 +290,12 @@ confirmation. Record everything in `design.md`.
 2. Run a mini-interview **only if** the description is ambiguous.
 3. **Impact analysis:** read the core docs and produce a table — affected doc →
    section → change summary. Examples: new table → `database.md` (+ migration
-   note); new endpoints → `api-contract.md`; mandays delta → `features.md`;
-   requirement changes → `requirements.md`; new screens or a changed visual
-   direction → `design.md`; and the new phases that implementation would need.
+   note); new endpoints → `api-contract.md`; mandays delta → `features.md`
+   (new/changed rows keep the Requirement(s) column accurate — add a new
+   `FR-N` to `requirements.md` if the feature introduces a requirement that
+   doesn't already have one); requirement changes → `requirements.md`; new
+   screens or a changed visual direction → `design.md`; and the new phases
+   that implementation would need.
 4. Ask exactly **one** decision question: implement **now** or **later**?
 5. - **Now** → open a `changelog.md` entry (type `feature`, size by judgment,
      status `in-progress`) → apply the updates to every affected core doc →
@@ -345,7 +375,10 @@ Every task's implementation is written to senior-developer standards:
   boundaries; parameterized queries only (never string-concatenated SQL); no
   hardcoded secrets or credentials — use environment variables; escape/sanitize
   output rendered to users (XSS); enforce authorization on every endpoint
-  (least privilege); never leak sensitive data in error messages or logs.
+  (least privilege); never leak sensitive data in error messages or logs. For
+  auth/authorization/payment/PII/crypto work specifically, this checklist is
+  the mandatory review checkpoint from Global rules, not just baseline style
+  — run through it explicitly and record the outcome.
 - **Explicit error handling:** never silently swallow errors; user-facing
   messages stay friendly, server-side logs carry the detail.
 - **Readable and maintainable:** descriptive naming, small focused functions,
@@ -411,6 +444,19 @@ committed on all branches, including main):
    Google Cloud deploy → `.gcloudignore`; publishable npm package →
    `.npmignore`. Create the file if missing; if it exists, append a marked
    block (`# devpilot:start` … `# devpilot:end`) preserving existing content.
+3. **Minimal CI scaffold** — deliberately narrow scope: a lint+test-on-push
+   workflow, nothing more (no coverage threshold, no deploy step, no policy
+   enforcement — that stays a non-goal). If the repo already has any CI
+   config (`.github/workflows/`, `.gitlab-ci.yml`, `.circleci/`, etc.), skip
+   this entirely — never touch existing CI setup. Otherwise, if the git
+   remote points at `github.com` (the common case; skip silently for any
+   other host or no remote — don't guess), propose generating
+   `.github/workflows/ci.yml` (ask once): install dependencies, then run the
+   project's **actual** existing lint/test commands as detected from its
+   manifest (`package.json` scripts, `composer.json`, `pyproject.toml`,
+   `go.mod` + `go test`, etc.) — never invent a command the project doesn't
+   already have; if it has neither a lint nor a test script, say so and skip
+   rather than generating an empty/fake workflow.
 
 ## Templates
 

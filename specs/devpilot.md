@@ -234,6 +234,41 @@ AI agent to build/extend projects without losing context between sessions.
     existing "stop as soon as every applicable core doc can be written
     concretely" rule (requirement 7) still bounds it on the other side.
 
+### Audit-driven hardening (v0.2.1)
+
+26. **Decision log.** `config.md` carries a Decision log section (lite ADR:
+    decision, rationale, alternatives considered). An entry is appended
+    whenever `init`/`onboard`/`feature`/`revise`/in-flight phase execution
+    settles a consequential tradeoff — a real alternative was on the table,
+    a scope cut, a divergence from what the user originally described, or a
+    structural call (e.g. the phase-file-layout switch, requirement 24).
+    Routine implementation choices don't qualify; the bar is "would the next
+    reader be confused without this."
+27. **Requirement traceability.** `features.md` rows carry a Requirement(s)
+    column citing the `FR-N` id(s) each feature implements, kept accurate as
+    either `requirements.md` or `features.md` changes (including by
+    `/devpilot feature`'s impact analysis, requirement 12).
+28. **Mandatory security review checkpoint.** Work touching authentication,
+    session handling, authorization/permission checks, payment/billing,
+    personal or otherwise sensitive user data, file upload, or
+    cryptography/secret handling is security-sensitive. Before marking such a
+    task/phase done, the security checklist (requirement 18) is run as an
+    explicit, reported step — using a dedicated security-review
+    subagent/skill if one is available in the environment, the checklist
+    directly otherwise — and the outcome is recorded in the closing
+    changelog entry's optional Security review field. This checkpoint has the
+    same non-skippable status as changelog logging (requirement 22) for
+    triggered work; it does not apply to non-sensitive work.
+29. **Minimal CI scaffold.** During Production hygiene (requirement 19), if
+    the project has no existing CI configuration and its git remote points at
+    GitHub, devpilot may propose (once, never silent) generating
+    `.github/workflows/ci.yml` that installs dependencies and runs the
+    project's own already-existing lint/test commands. It never invents a
+    command the project doesn't have, never sets a coverage threshold, and
+    never touches an existing CI configuration. This does not change the
+    testing-policy non-goal below — the workflow runs whatever already
+    exists, it doesn't mandate what should exist.
+
 ## Constraints
 
 - **Markdown-only skill**: no runtime dependencies, no network calls, no installer.
@@ -254,9 +289,12 @@ AI agent to build/extend projects without losing context between sessions.
 - Phase execution requires a git repository (for checkpoints); see edge cases for
   the non-git flow.
 - Non-goals: no time tracking, no external PM-tool integration (Jira etc.), no
-  multi-user collaboration features, no enforcement of the 80%-coverage/TDD policy
-  on target projects (the skill may recommend tests as phase tasks, but testing
-  policy belongs to the target project, not devpilot).
+  multi-user collaboration features (no PR-review workflow, branch protection,
+  or CODEOWNERS — devpilot commits directly, single-agent-and-user model), no
+  enforcement of the 80%-coverage/TDD policy on target projects (the skill may
+  recommend tests as phase tasks, and requirement 29's CI scaffold runs
+  whatever tests/lint already exist, but neither invents a testing policy nor
+  gates on coverage — that stays the target project's call, not devpilot's).
 
 ## Edge Cases
 
@@ -302,6 +340,14 @@ AI agent to build/extend projects without losing context between sessions.
     `phases/phase-{N}.md`, leave tables in `phases/00-overview.md`, update
     `config.md`'s Phase file layout row) in the same turn it's confirmed —
     never a partially-done state left for the user to finish.
+16. **No dedicated security-review subagent/skill available** (requirement
+    28): perform the security checklist directly and say so in the phase
+    report — the checkpoint still runs, it just isn't delegated.
+17. **Git remote isn't GitHub, or there's no remote yet** (requirement 29):
+    skip the CI scaffold proposal silently — don't ask, don't guess at a
+    different CI provider's config format.
+18. **Project already has a CI config**: requirement 29's scaffold never
+    triggers; devpilot doesn't inspect or modify existing CI setup at all.
 
 ## Definition of Done
 
@@ -351,4 +397,17 @@ AI agent to build/extend projects without losing context between sessions.
       and performs the `single` → `split` conversion itself (verified: no
       task/status data lost, `config.md` updated, `resume`/`status` still work
       unchanged against the split layout).
-- [ ] Edge cases 1–3, 5, 6, and 10 verified by manual test on a scratch project.
+- [ ] **Audit-hardening test**: on a project with a genuine tech-stack tradeoff
+      and an auth/payment-touching feature, `init`/`feature` produces a
+      `config.md` Decision log entry, a `features.md` row with a populated
+      Requirement(s) column, and a changelog entry with its Security review
+      field filled in (checklist-performed, since no security-review
+      subagent is assumed present); `/devpilot docs dashboard` still renders
+      cleanly with these fields populated.
+- [ ] **CI scaffold test**: on a GitHub-remote project with no existing CI and
+      a real `test`/`lint` script in its manifest, Production hygiene
+      generates `.github/workflows/ci.yml` running exactly those commands (no
+      invented ones); on a project with an existing CI config, nothing is
+      touched.
+- [ ] Edge cases 1–3, 5, 6, 10, and 16–18 verified by manual test on a scratch
+      project.

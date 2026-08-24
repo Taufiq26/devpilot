@@ -9,7 +9,7 @@
 | Document language | {Indonesian / English / …} |
 | Docs folder | {docs} |
 | Created | {YYYY-MM-DD} |
-| devpilot version | 0.2.0 |
+| devpilot version | 0.2.1 |
 | Core doc filenames | numbered ({00-config.md} …) |
 | Phase file layout | {single / split — see SKILL.md Global rules} |
 
@@ -50,3 +50,22 @@
 | Document | Type | Ingested | Used for |
 |---|---|---|---|
 | {client-srs.pdf} | {SRS} | {YYYY-MM-DD} | {requirements.md, features.md} |
+
+## Decision log
+
+<!-- Lite ADR (Architecture Decision Record). One entry per consequential
+     decision — tech/architecture tradeoffs, scope cuts, a divergence from
+     what the user originally asked for, or a structural choice like the
+     phase file layout switch. NOT every small choice — if it wouldn't
+     surprise someone reading the docs cold, it doesn't need an entry. See
+     SKILL.md Global rules for when to append one. -->
+_No decisions logged yet._
+
+<!-- Entry format:
+
+### {YYYY-MM-DD} — {short decision title}
+
+- **Decision:** {what was decided}
+- **Rationale:** {why, in the context at the time}
+- **Alternatives considered:** {what else was on the table, and why not}
+-->
